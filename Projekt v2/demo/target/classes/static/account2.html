@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+    <meta charset="UTF-8">
+    <title>BookZone</title>
+    <link href="https://fonts.googleapis.com/css?family=Roboto:400,900&subset=latin-ext" rel="stylesheet">
+    <link rel="shortcut icon" href="favicon.ico" type="image/x-icon">
+    <link rel="stylesheet" href="style.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+   
+</head>
+<body>
+    <div id="wrapper">
+        <nav>
+            <a class="menu" href="index.html">Strona Główna</a>
+            <a class="menu" href="cart.html">Koszyk</a>
+            <a class="menu" href="account2.html">Moje Konto</a>
+            <a class="menu" href="log.html">Zaloguj się !</a>
+            <button id="toggle-dark-mode">Zmień motyw</button>
+        </nav>
+
+        <header>
+            <img src="graph/header.png" alt="header">
+        </header>
+
+        <section id="account">
+            <article>
+                <h1>Musisz się zalogować by zobaczyć stronę!</h1>    
+            </article>
+        </section>
+    </div>
+    
+    <script>// Funkcja do przełączania motywu
+function toggleDarkMode() {
+    const isDarkMode = document.body.classList.toggle('dark-mode');
+
+    // Zapisanie stanu motywu w localStorage
+    localStorage.setItem('darkMode', isDarkMode ? 'enabled' : 'disabled');
+
+    // Synchronizacja motywu w zakładkach i innych sekcjach
+    synchronizeDarkMode();
+}
+
+// Funkcja do załadowania motywu z localStorage
+function loadDarkModePreference() {
+    const darkModePreference = localStorage.getItem('darkMode');
+    if (darkModePreference === 'enabled') {
+        document.body.classList.add('dark-mode');
+        synchronizeDarkMode();
+    }
+}
+
+// Funkcja do synchronizacji motywu w zakładkach, sekcjach, i innych elementach
+function synchronizeDarkMode() {
+    const isDarkMode = document.body.classList.contains('dark-mode');
+
+    // Lista elementów, które powinny być dostosowane do ciemnego motywu
+    const elementsToAdjust = [
+        'nav', 'footer', '.book', '.top-book', '.modal-content', '.section', 
+        '#cart-table th', '#cart-table td', 'button', 'h1', 'h2', 'h3', 'p', 'a', 
+        'input', 'textarea', 'select', '#cart-summary', '#filter', '#filter select', 
+        '#filter input', '.tab', '#challenge'
+    ];
+
+    elementsToAdjust.forEach(selector => {
+        const elements = document.querySelectorAll(selector);
+        elements.forEach(el => {
+            if (isDarkMode) {
+                el.classList.add('dark-mode');
+            } else {
+                el.classList.remove('dark-mode');
+            }
+        });
+    });
+}
+
+// Funkcja do zarządzania przełączaniem zakładek
+function handleTabSwitching() {
+    const tabs = document.querySelectorAll('.tab');
+    tabs.forEach(tab => {
+        tab.addEventListener('click', () => {
+            // Usunięcie klasy aktywnej z innych zakładek
+            tabs.forEach(t => t.classList.remove('active'));
+            // Dodanie klasy aktywnej do klikniętej zakładki
+            tab.classList.add('active');
+
+            // Ukrywanie i pokazywanie sekcji na podstawie zakładki
+            const sectionId = tab.dataset.section;
+            document.querySelectorAll('.section').forEach(section => {
+                section.classList.remove('active');
+            });
+            const activeSection = document.getElementById(sectionId);
+            activeSection.classList.add('active');
+
+            // Synchronizacja motywu w nowej zakładce
+            synchronizeDarkMode();
+        });
+    });
+}
+
+// Inicjalizacja po załadowaniu DOM
+document.addEventListener('DOMContentLoaded', () => {
+    // Ładowanie preferencji motywu
+    loadDarkModePreference();
+
+    // Zarządzanie przełączaniem zakładek
+    handleTabSwitching();
+
+    // Obsługa przełączania motywu
+    const darkModeToggle = document.getElementById('toggle-dark-mode');
+    if (darkModeToggle) {
+        darkModeToggle.addEventListener('click', toggleDarkMode);
+    }
+});
+</script>
+    </body>
+</html>
