@@ -1,0 +1,371 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+    <meta charset="UTF-8">
+    <title>BookZone</title>
+    <link href="https://fonts.googleapis.com/css?family=Roboto:400,900&subset=latin-ext" rel="stylesheet">
+    <link rel="shortcut icon" href="favicon.ico" type="image/x-icon">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div id="wrapper">
+        <nav>
+            <a class="menu" href="index.html">Strona Główna</a>
+            <a class="menu" href="cart.html">Koszyk</a>
+            <a class="menu" href="account.html">Moje Konto</a>
+
+            <button id="toggle-dark-mode">Zmień motyw</button>
+        </nav>
+
+        <header>
+            <img src="graph/header.png" alt="header">
+        </header>
+
+        <section id="account">
+            <article>
+                <h1>Witaj w Twoim koncie!</h1>
+            </article>
+        </section>
+
+        <nav>
+            <a href="#" onclick="switchTab('reviews')">Recenzje</a>
+            <a href="#" onclick="switchTab('challenge')">Wyzwanie</a>
+        </nav>
+
+        <!-- Sekcja recenzji książek -->
+        <div id="reviews" class="section active">
+            <h2>Twoje recenzje</h2>
+            <form id="review-form">
+                <label for="book-select">Wybierz książkę:</label>
+                <select id="book-select" name="bookId" required>
+                    <option value="" disabled selected>Wybierz książkę</option>
+                    <!-- Opcje książek będą dodane dynamicznie przez JavaScript -->
+                </select>
+
+                <label for="rating">Ocena (1-5):</label>
+                <input type="number" id="rating" name="rating" min="1" max="5" required>
+
+                <label for="note">Notatka:</label>
+                <textarea id="note" name="reviewText"></textarea>
+
+                <button type="submit">Dodaj recenzję</button>
+            </form>
+
+            <h2>Zapisane recenzje</h2>
+            <div id="saved-reviews-container"></div>
+        </div>
+
+        <!-- Wyzwanie czytelnicze -->
+        <div id="challenge" class="section">
+            <h2>Wyzwanie czytelnicze</h2>
+            <p>Twój cel czytelniczy:</p>
+            <p id="reading-goal-status"></p>
+
+            <p>Przeczytane książki:</p>
+            <p id="books-read-status"></p>
+
+            <p>Ustaw cel czytelniczy:</p>
+            <input type="number" id="reading-goal" placeholder="Liczba książek">
+            <button onclick="setReadingGoal()">Ustaw cel</button>
+            
+            <h3>Przeczytano książki</h3>
+            <p>Dodaj liczbę przeczytanych książek:</p>
+            <input type="number" id="books-read" placeholder="Liczba książek">
+            <button onclick="addBooksRead()">Dodaj przeczytane książki</button>
+            
+            <p id="challenge-status"></p>
+        </div>
+
+        <script>
+            const apiUrl = "http://localhost:8080"; // Adres backendu
+            const userId = 1; // Przykładowe ID użytkownika. Możesz podmienić na dynamiczne.
+
+            // Funkcja do przełączania zakładek
+            function switchTab(sectionId) {
+                document.querySelectorAll('.section').forEach(section => section.classList.remove('active'));
+                const section = document.getElementById(sectionId);
+                section.classList.add('active');
+
+                if (sectionId === 'reviews') {
+                    loadSavedReviews();
+                } else if (sectionId === 'challenge') {
+                    updateChallengeStatus();
+                }
+            }
+
+            // Funkcja do załadowania książek do selektu w formularzu recenzji
+            async function loadBooks() {
+                try {
+                    const response = await fetch(`${apiUrl}/api/books`);
+                    const books = await response.json();
+                    const bookSelect = document.getElementById('book-select');
+                    
+                    // Wyczyść istniejące opcje
+                    bookSelect.innerHTML = '';
+
+                    // Dodaj domyślną opcję
+                    const defaultOption = document.createElement('option');
+                    defaultOption.textContent = 'Wybierz książkę';
+                    defaultOption.disabled = true;
+                    defaultOption.selected = true;
+                    bookSelect.appendChild(defaultOption);
+
+                    // Dodaj książki do listy rozwijanej
+                    books.forEach(book => {
+                        const option = document.createElement('option');
+                        option.value = book.id;  // ID książki
+                        option.textContent = book.title;  // Tytuł książki
+                        bookSelect.appendChild(option);
+                    });
+                } catch (error) {
+                    console.error('Błąd podczas ładowania książek:', error);
+                }
+            }
+
+            // Obsługa wysyłania formularza recenzji
+           document.getElementById('review-form').addEventListener('submit', async (e) => {
+    e.preventDefault();
+
+    const bookId = document.getElementById('book-select').value;
+    const rating = document.getElementById('rating').value;
+    const reviewText = document.getElementById('note').value;
+
+    if (!bookId || !rating || !reviewText) {
+        alert('Proszę uzupełnić wszystkie pola.');
+        return;
+    }
+
+    try {
+        const response = await fetch(`${apiUrl}/api/review`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                rating: parseInt(rating, 10),
+                reviewText: reviewText,
+                book: { id: parseInt(bookId, 10) } // Wysyłamy obiekt książki z ID
+            }),
+        });
+
+        if (response.ok) {
+            alert('Recenzja została dodana!');
+            loadSavedReviews(); // Załaduj zapisane recenzje po dodaniu
+        } else {
+            const errorText = await response.text();
+            console.error('Odpowiedź z backendu:', errorText);
+            alert(`Wystąpił błąd: ${errorText}`);
+        }
+    } catch (error) {
+        console.error('Błąd podczas wysyłania recenzji:', error);
+        alert('Wystąpił błąd podczas wysyłania recenzji.');
+    }
+});
+
+            // Funkcja do załadowania zapisanych recenzji
+            async function loadSavedReviews() {
+                try {
+                    const response = await fetch(`${apiUrl}/api/review`);
+                    const reviews = await response.json();
+                    const savedReviewsContainer = document.getElementById('saved-reviews-container');
+                    savedReviewsContainer.innerHTML = ''; // Wyczyść poprzednie recenzje
+
+                    if (reviews.length === 0) {
+                        savedReviewsContainer.innerHTML = '<p>Brak zapisanych recenzji.</p>';
+                    } else {
+                        reviews.forEach(review => {
+                            const reviewDiv = document.createElement('div');
+                            reviewDiv.innerHTML = `
+                                <p><strong>Ocena:</strong> ${review.rating}/5</p>
+                                <p><strong>Notatka:</strong> ${review.reviewText}</p>
+                                <p><strong>Tytuł książki:</strong> ${review.book.title}</p>
+                            `;
+                            savedReviewsContainer.appendChild(reviewDiv);
+                        });
+                    }
+                } catch (error) {
+                    console.error('Błąd podczas ładowania zapisanych recenzji:', error);
+                    alert('Wystąpił błąd podczas ładowania recenzji.');
+                }
+            }
+
+          // Funkcja do ustawiania celu czytelniczego
+async function setReadingGoal() {
+    const goal = parseInt(document.getElementById('reading-goal').value, 10);
+
+    if (isNaN(goal) || goal <= 0) {
+        alert('Podaj prawidłowy cel.');
+        return;
+    }
+
+    try {
+        const response = await fetch(`${apiUrl}/api/challenge`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ goal }),
+        });
+
+        if (response.ok) {
+            alert('Cel został ustawiony!');
+            updateChallengeStatus(); // Zaktualizuj status wyzwania
+        } else {
+            const errorText = await response.text();
+            alert(`Wystąpił błąd: ${errorText}`);
+        }
+    } catch (error) {
+        console.error('Błąd podczas ustawiania celu:', error);
+        alert('Wystąpił błąd podczas ustawiania celu.');
+    }
+}
+
+// Funkcja do aktualizacji statusu wyzwania
+async function updateChallengeStatus() {
+    try {
+        const response = await fetch(`${apiUrl}/api/challenge`);
+        const challenge = await response.json();
+
+        if (response.ok && challenge) {
+            document.getElementById('reading-goal-status').textContent = `Cel: ${challenge.goal} książek`;
+            document.getElementById('books-read-status').textContent = `Przeczytane: ${challenge.booksRead} książek`;
+            document.getElementById('challenge-status').textContent = challenge.booksRead >= challenge.goal ? 'Gratulacje! Osiągnąłeś swój cel!' : '';
+        } else {
+            alert('Brak danych wyzwania lub błąd w odpowiedzi.');
+        }
+    } catch (error) {
+        console.error('Błąd podczas pobierania statusu wyzwania:', error);
+        alert('Wystąpił błąd podczas pobierania danych wyzwania.');
+    }
+}
+
+// Funkcja do dodawania przeczytanych książek
+async function addBooksRead() {
+    const booksRead = parseInt(document.getElementById('books-read').value, 10);
+
+    if (isNaN(booksRead) || booksRead <= 0) {
+        alert('Podaj prawidłową liczbę książek.');
+        return;
+    }
+
+    try {
+        const response = await fetch(`${apiUrl}/api/challenge/add-books`, {
+            method: 'PATCH',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ booksRead }),
+        });
+
+        if (response.ok) {
+            alert(`Dodano ${booksRead} książek do wyzwania.`);
+            updateChallengeStatus(); // Zaktualizuj status wyzwania
+        } else {
+            const errorText = await response.text();
+            alert(`Wystąpił błąd: ${errorText}`);
+        }
+    } catch (error) {
+        console.error('Błąd podczas dodawania książek:', error);
+        alert('Wystąpił błąd podczas dodawania książek.');
+    }
+}
+
+// Inicjalizacja po załadowaniu strony
+window.onload = () => {
+    loadBooks(); // Załaduj książki do recenzji
+    loadSavedReviews(); // Załaduj zapisane recenzje
+    updateChallengeStatus(); // Zaktualizuj status wyzwania
+};
+
+
+            // Wylogowanie użytkownika
+            document.getElementById('logout-btn').addEventListener('click', () => {
+                alert('Wylogowano.');
+                window.location.href = 'index.html';
+            });
+            
+            // Funkcja do przełączania motywu
+function toggleDarkMode() {
+    const isDarkMode = document.body.classList.toggle('dark-mode');
+
+    // Zapisanie stanu motywu w localStorage
+    localStorage.setItem('darkMode', isDarkMode ? 'enabled' : 'disabled');
+
+    // Synchronizacja motywu w zakładkach i innych sekcjach
+    synchronizeDarkMode();
+}
+
+// Funkcja do załadowania motywu z localStorage
+function loadDarkModePreference() {
+    const darkModePreference = localStorage.getItem('darkMode');
+    if (darkModePreference === 'enabled') {
+        document.body.classList.add('dark-mode');
+        synchronizeDarkMode();
+    }
+}
+
+// Funkcja do synchronizacji motywu w zakładkach, sekcjach, i innych elementach
+function synchronizeDarkMode() {
+    const isDarkMode = document.body.classList.contains('dark-mode');
+
+    // Lista elementów, które powinny być dostosowane do ciemnego motywu
+    const elementsToAdjust = [
+        'nav', 'footer', '.book', '.top-book', '.modal-content', '.section', 
+        '#cart-table th', '#cart-table td', 'button', 'h1', 'h2', 'h3', 'p', 'a', 
+        'input', 'textarea', 'select', '#cart-summary', '#filter', '#filter select', 
+        '#filter input', '.tab', '#challenge'
+    ];
+
+    elementsToAdjust.forEach(selector => {
+        const elements = document.querySelectorAll(selector);
+        elements.forEach(el => {
+            if (isDarkMode) {
+                el.classList.add('dark-mode');
+            } else {
+                el.classList.remove('dark-mode');
+            }
+        });
+    });
+}
+
+// Funkcja do zarządzania przełączaniem zakładek
+function handleTabSwitching() {
+    const tabs = document.querySelectorAll('.tab');
+    tabs.forEach(tab => {
+        tab.addEventListener('click', () => {
+            // Usunięcie klasy aktywnej z innych zakładek
+            tabs.forEach(t => t.classList.remove('active'));
+            // Dodanie klasy aktywnej do klikniętej zakładki
+            tab.classList.add('active');
+
+            // Ukrywanie i pokazywanie sekcji na podstawie zakładki
+            const sectionId = tab.dataset.section;
+            document.querySelectorAll('.section').forEach(section => {
+                section.classList.remove('active');
+            });
+            const activeSection = document.getElementById(sectionId);
+            activeSection.classList.add('active');
+
+            // Synchronizacja motywu w nowej zakładce
+            synchronizeDarkMode();
+        });
+    });
+}
+
+// Inicjalizacja po załadowaniu DOM
+document.addEventListener('DOMContentLoaded', () => {
+    // Ładowanie preferencji motywu
+    loadDarkModePreference();
+
+    // Zarządzanie przełączaniem zakładek
+    handleTabSwitching();
+
+    // Obsługa przełączania motywu
+    const darkModeToggle = document.getElementById('toggle-dark-mode');
+    if (darkModeToggle) {
+        darkModeToggle.addEventListener('click', toggleDarkMode);
+    }
+});
+
+        </script>
+    </div>
+</body>
+</html>
