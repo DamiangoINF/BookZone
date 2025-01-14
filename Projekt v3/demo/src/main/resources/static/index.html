@@ -1,0 +1,300 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+    <meta charset="UTF-8">
+    <title>BookZone</title>
+    <link href="https://fonts.googleapis.com/css?family=Roboto:400,900&subset=latin-ext" rel="stylesheet">
+    <link rel="shortcut icon" href="favicon.ico" type="image/x-icon">
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+    <div id="wrapper">
+        <nav>
+            <a class="menu" href="index.html">Strona Główna</a>
+            <a class="menu" href="cart.html">Koszyk</a>
+            <a class="menu" href="account2.html">Moje Konto</a>
+            <a class="menu" href="log.html">Zaloguj się!</a>
+            <button id="toggle-dark-mode">Zmień motyw</button>
+        </nav>
+
+        <header>
+            <img src="graph/header.png" alt="header">
+        </header>
+
+        <section>
+            <article>
+                <h1>Sprawdź wszystkie nasze pozycje!</h1>
+            </article>
+        </section>
+        
+        <section>
+            <div id="filter">
+                <label for="category">Wybierz kategorię:</label>
+                <select id="category">
+                    <option value="all">Wszystkie</option>
+                    <option value="Fantasy">Fantasy</option>
+                    <option value="Sci-Fi">Sci-Fi</option>
+                    <option value="Romans">Romans</option>
+                    <option value="Thriller">Thriller</option>
+                </select>
+                
+                <input type="text" id="search" placeholder="Wyszukaj książkę lub autora">
+            </div>
+            
+            <div class="books">
+                <!-- Książki będą dodane dynamicznie za pomocą JavaScript -->
+            </div>
+        </section>
+
+        <section>
+            <article>
+                <h1>Nasze TOP10!</h1>
+            </article>
+            <div id="books-5-stars"></div>
+        </section>
+
+        <footer>
+            <img src="" alt="footer">
+        </footer>
+    </div>
+
+    <div id="modal" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="closeModal()">&times;</span>
+            <h2 id="modal-title"></h2>
+            <p><strong>Autor:</strong> <span id="modal-author"></span></p>
+            <p><strong>Kategoria:</strong> <span id="modal-category"></span></p>
+            <p><strong>Opis:</strong> <span id="modal-description"></span></p>
+            <p><strong>Ocena:</strong> <span id="modal-rating"></span></p> 
+        </div>
+    </div>
+
+    <script>
+        const booksContainer = document.querySelector('.books');
+        const categorySelect = document.getElementById('category');
+        const searchInput = document.getElementById('search');
+
+        function generateStars(rating) {
+            let fullStars = Math.floor(rating);
+            let halfStars = (rating % 1) >= 0.5 ? 1 : 0;
+            let emptyStars = 5 - fullStars - halfStars;
+            let stars = '';
+            for (let i = 0; i < fullStars; i++) stars += '&#9733;';
+            if (halfStars === 1) stars += '&#9733;';
+            for (let i = 0; i < emptyStars; i++) stars += '&#9734;';
+            return stars;
+        }
+
+        async function fetchBooks() {
+            try {
+                const response = await fetch('http://localhost:8080/api/books');
+                const books = await response.json();
+                booksContainer.innerHTML = '';
+                
+                // Get selected category and search query
+                const selectedCategory = categorySelect.value;
+                const searchQuery = searchInput.value.toLowerCase();
+
+                // Filter books by selected category and search query
+                const filteredBooks = books.filter(book => {
+                    const matchesCategory = selectedCategory === 'all' || book.category === selectedCategory;
+                    const matchesSearch = book.title.toLowerCase().includes(searchQuery) || book.author.toLowerCase().includes(searchQuery);
+                    return matchesCategory && matchesSearch;
+                });
+
+                filteredBooks.forEach(book => {
+                    const bookElement = document.createElement('div');
+                    bookElement.classList.add('book');
+                    bookElement.dataset.category = book.category;
+                    bookElement.dataset.title = book.title;
+                    bookElement.dataset.author = book.author;
+                    bookElement.dataset.description = book.description;
+                    bookElement.dataset.rating = book.rating;
+                    bookElement.dataset.price = book.price;
+
+                    const imageUrl = `books/${book.title.toLowerCase().replace(/\s+/g, '-')}.jpg`;
+
+                    bookElement.innerHTML = `
+                        <img src="${imageUrl}" alt="${book.title}" class="book-cover">
+                        <h3>${book.title}</h3>
+                        <p>Autor: ${book.author}</p>
+                        <p>Kategoria: ${book.category}</p>
+                        <p>Cena: ${book.price} zł</p>
+                        <p>Ocena: <span class="stars">${generateStars(book.rating)}</span></p>
+                        <button onclick="showDetails(this)">Pokaż szczegóły</button>
+                        <button onclick="addToCart(${book.id}, 1)">Dodaj do koszyka</button>
+                    `;
+                    booksContainer.appendChild(bookElement);
+                });
+
+                displayTopBooks(filteredBooks);
+            } catch (error) {
+                console.error('Błąd podczas pobierania książek:', error);
+            }
+        }
+
+        function displayTopBooks(books) {
+            const topBooks = books.sort((a, b) => b.rating - a.rating).slice(0, 10);
+            const topBooksContainer = document.getElementById('books-5-stars');
+            topBooksContainer.innerHTML = '';
+            topBooks.forEach(book => {
+                const bookElement = document.createElement('div');
+                bookElement.classList.add('top-book');
+                const imageUrl = `books/${book.title.toLowerCase().replace(/\s+/g, '-')}.jpg`;
+                bookElement.innerHTML = `
+                    <img src="${imageUrl}" alt="${book.title}" class="book-cover">
+                    <h3>${book.title}</h3>
+                    <p>Autor: ${book.author}</p>
+                    <p>Kategoria: ${book.category}</p>
+                    <p>Cena: ${book.price} zł</p>
+                    <p>Ocena: <span class="stars">${generateStars(book.rating)}</span></p>
+                    <button onclick="redirectToFullCatalog()">Sprawdź !</button>
+                `;
+                topBooksContainer.appendChild(bookElement);
+            });
+        }
+
+        function redirectToFullCatalog() {
+            // Scroll to the "Sprawdź wszystkie nasze pozycje" section
+            window.scrollTo({
+                top: document.querySelector('section:nth-of-type(1)').offsetTop,
+                behavior: 'smooth'
+            });
+        }
+
+        function showDetails(button) {
+            const bookElement = button.closest('.book');
+            const title = bookElement.dataset.title;
+            const author = bookElement.dataset.author;
+            const category = bookElement.dataset.category;
+            const description = bookElement.dataset.description;
+            const rating = bookElement.dataset.rating;
+            document.getElementById('modal-title').innerText = title;
+            document.getElementById('modal-author').innerText = author;
+            document.getElementById('modal-category').innerText = category;
+            document.getElementById('modal-description').innerText = description;
+            document.getElementById('modal-rating').innerHTML = generateStars(rating);
+            document.getElementById('modal').style.display = 'block';
+        }
+
+        function closeModal() {
+            document.getElementById('modal').style.display = 'none';
+        }
+
+       // Funkcja do dodawania książki do koszyka
+        async function addToCart(bookId) {
+            try {
+                const response = await fetch(`http://localhost:8080/api/cart`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ bookId, quantity: 1 }),
+                });
+
+                if (response.ok) {
+                    alert('Książka dodana do koszyka!');
+                } else {
+                    alert('Błąd podczas dodawania do koszyka.');
+                }
+            } catch (error) {
+                console.error('Błąd:', error);
+            }
+        }
+
+        // Event listeners for category and search input
+        categorySelect.addEventListener('change', fetchBooks);
+        searchInput.addEventListener('input', fetchBooks);
+
+        document.addEventListener('DOMContentLoaded', fetchBooks);
+        
+        
+// Funkcja do przełączania motywu
+function toggleDarkMode() {
+    const isDarkMode = document.body.classList.toggle('dark-mode');
+
+    // Zapisanie stanu motywu w localStorage
+    localStorage.setItem('darkMode', isDarkMode ? 'enabled' : 'disabled');
+
+    // Synchronizacja motywu w zakładkach i innych sekcjach
+    synchronizeDarkMode();
+}
+
+// Funkcja do załadowania motywu z localStorage
+function loadDarkModePreference() {
+    const darkModePreference = localStorage.getItem('darkMode');
+    if (darkModePreference === 'enabled') {
+        document.body.classList.add('dark-mode');
+        synchronizeDarkMode();
+    }
+}
+
+// Funkcja do synchronizacji motywu w zakładkach, sekcjach, i innych elementach
+function synchronizeDarkMode() {
+    const isDarkMode = document.body.classList.contains('dark-mode');
+
+    // Lista elementów, które powinny być dostosowane do ciemnego motywu
+    const elementsToAdjust = [
+        'nav', 'footer', '.book', '.top-book', '.modal-content', '.section', 
+        '#cart-table th', '#cart-table td', 'button', 'h1', 'h2', 'h3', 'p', 'a', 
+        'input', 'textarea', 'select', '#cart-summary', '#filter', '#filter select', 
+        '#filter input', '.tab', '#challenge'
+    ];
+
+    elementsToAdjust.forEach(selector => {
+        const elements = document.querySelectorAll(selector);
+        elements.forEach(el => {
+            if (isDarkMode) {
+                el.classList.add('dark-mode');
+            } else {
+                el.classList.remove('dark-mode');
+            }
+        });
+    });
+}
+
+// Funkcja do zarządzania przełączaniem zakładek
+function handleTabSwitching() {
+    const tabs = document.querySelectorAll('.tab');
+    tabs.forEach(tab => {
+        tab.addEventListener('click', () => {
+            // Usunięcie klasy aktywnej z innych zakładek
+            tabs.forEach(t => t.classList.remove('active'));
+            // Dodanie klasy aktywnej do klikniętej zakładki
+            tab.classList.add('active');
+
+            // Ukrywanie i pokazywanie sekcji na podstawie zakładki
+            const sectionId = tab.dataset.section;
+            document.querySelectorAll('.section').forEach(section => {
+                section.classList.remove('active');
+            });
+            const activeSection = document.getElementById(sectionId);
+            activeSection.classList.add('active');
+
+            // Synchronizacja motywu w nowej zakładce
+            synchronizeDarkMode();
+        });
+    });
+}
+
+// Inicjalizacja po załadowaniu DOM
+document.addEventListener('DOMContentLoaded', () => {
+    // Ładowanie preferencji motywu
+    loadDarkModePreference();
+
+    // Zarządzanie przełączaniem zakładek
+    handleTabSwitching();
+
+    // Obsługa przełączania motywu
+    const darkModeToggle = document.getElementById('toggle-dark-mode');
+    if (darkModeToggle) {
+        darkModeToggle.addEventListener('click', toggleDarkMode);
+    }
+});
+
+
+
+
+    </script>
+</body>
+</html>
+
