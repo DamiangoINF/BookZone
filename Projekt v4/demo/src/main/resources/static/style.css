@@ -1,0 +1,725 @@
+* {
+    margin: 0;
+    box-sizing: border-box;
+    padding: 0;
+    font-family: Roboto, Arial;
+
+}
+
+#wrapper {
+    margin: 0 0;
+    background-color: white;
+}
+
+header img {
+    width: 100%; 
+    display: block;
+}
+
+nav {
+    background-color: #e22500;
+    text-align: center; 
+    
+}
+
+a.menu {
+    display: inline-block;
+    width: 11%;
+    padding: 15px 15px;
+    color: white;
+    text-decoration: none;
+    text-align: center;
+}
+
+a.menu:hover {
+    background-color: #ffe7e9;
+    color: black;
+}
+
+
+article {
+margin-top:30px;
+margin-bottom: 20px;
+}
+
+article h1 {
+font-size:30px;
+text-align: center;
+margin: 0 20% 20px 20%;
+padding-bottom: 15px;
+border-bottom: 2px solid #e22500;
+color: #ce3011;}
+
+footer img {
+    width: 100%; 
+    display: block;
+}
+
+
+            /* Modal */
+            .modal {
+                display: none;
+                position: fixed;
+                top: 0;
+                left: 0;
+                width: 100%;
+                height: 100%;
+                background-color: rgba(0, 0, 0, 0.5);
+                justify-content: center;
+                align-items: center;
+                z-index: 1000;
+            }
+
+            .modal-content {
+                background-color: white;
+                padding: 20px;
+                border-radius: 10px;
+                width: 90%;
+                max-width: 400px;
+                position: relative;
+                text-align: center;
+            }
+
+            .close {
+                position: absolute;
+                top: 10px;
+                right: 10px;
+                font-size: 24px;
+                cursor: pointer;
+            }
+
+            /* Zakładki */
+            .tabs {
+                display: flex;
+                justify-content: space-around;
+                margin-bottom: 20px;
+            }
+
+            .tab {
+                padding: 10px 20px;
+                cursor: pointer;
+                border: none;
+                background-color: #e22500;
+                color: white;
+                border-radius: 5px;
+            }
+
+            .tab.active {
+                background-color: #ffe7e9;
+                color: black;
+            }
+
+            /* Formularze */
+            .form {
+                display: none;
+            }
+
+            .form.active {
+                display: block;
+            }
+
+            form label {
+                display: block;
+                margin-top: 10px;
+                text-align: left;
+            }
+
+            form input {
+                width: 100%;
+                padding: 10px;
+                margin-top: 5px;
+                border: 1px solid #ccc;
+                border-radius: 5px;
+            }
+
+            form button {
+                margin-top: 20px;
+                padding: 10px 20px;
+                background-color: #e22500;
+                color: white;
+                border: none;
+                border-radius: 5px;
+                cursor: pointer;
+            }
+
+         
+
+
+/* Ksiazki*/
+
+ section {
+        padding: 10px;
+            }
+
+ #filter {
+    display: flex;
+    justify-content: flex-end; 
+    align-items: center;
+    gap: 10px; 
+    margin-bottom: 20px;
+}
+
+            #filter select, #filter input {
+                padding: 10px;
+                font-size: 16px;
+                border-radius: 5px;
+                border: 1px solid #ccc;
+            }
+
+    /* Ujednolicenie układu książek w obu sekcjach */
+.books, #books-5-stars {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center; 
+    gap: 20px; 
+    margin-top: 20px;
+}
+
+/* Styl dla książek - dla wszystkich sekcji */
+.book, .top-book {
+    width: 200px;
+    height: auto;
+    border: 1px solid #ccc;
+    border-radius: 10px;
+    overflow: hidden;
+    background: #f9f9f9;
+    text-align: center;
+    transition: transform 0.3s ease;
+}
+
+.book:hover, .top-book:hover {
+    transform: scale(1.05); /* Efekt powiększenia przy najechaniu */
+}
+
+.book img, .top-book img {
+    margin-top: 10px;
+    width: 150px;  /* Zmieniamy szerokość okładki */
+    height: auto;
+    object-fit: cover; /* Zapewnia, że okładka zachowa dobry proporcje */
+}
+
+.book h3, .top-book h3 {
+    font-size: 18px;
+    margin: 10px 0;
+}
+
+.book p, .top-book p {
+    font-size: 14px;
+    padding: 0 10px;
+    margin-bottom: 10px;
+    color: #666;
+}
+
+.book button, .top-book button {
+    margin-bottom: 10px;
+    padding: 10px 15px;
+    background-color: #e22500;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+.book button:hover, .top-book button:hover {
+    background-color: #ce3011;
+}
+
+
+/* Stylizacja modala opisu ksiazek*/
+
+.modal {
+    display: none; /* Początkowo modal jest ukryty */
+    position: fixed;
+    z-index: 1;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    overflow: auto;
+    background-color: rgba(0,0,0,0.4); /* Przezroczyste tło */
+}
+
+/* Kontener modala */
+.modal-content {
+    background-color: #fefefe;
+    margin: 15% auto;
+    padding: 20px;
+    border: 1px solid #888;
+    width: 80%;
+}
+
+/* Przycisk zamknięcia */
+.close {
+    color: #aaa;
+    float: right;
+    font-size: 28px;
+    font-weight: bold;
+}
+
+.close:hover,
+.close:focus {
+    color: black;
+    text-decoration: none;
+    cursor: pointer;
+}
+
+/* Powiadomienia */
+.notification {
+    display: none;
+    position: fixed;
+    top: 50%; 
+    left: 50%; 
+    transform: translate(-50%, -50%); 
+    background-color: black;
+    color: white;
+    padding: 25px 40px; 
+    border-radius: 10px; 
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+    z-index: 1100;
+    text-align: center; 
+    font-size: 18px; 
+    width: auto; 
+    max-width: 80%;
+}
+
+/* Zwiększenie rozmiaru, gdy powiadomienie jest widoczne */
+.notification.show {
+    display: block;
+}
+
+
+
+/* Koszyk */
+
+#cart-container {
+    padding: 20px;
+    margin-top: 20px;
+}
+
+#cart-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-bottom: 20px;
+}
+
+#cart-table th, #cart-table td {
+    padding: 10px;
+    border: 1px solid #ddd;
+    text-align: center;
+}
+
+#cart-summary {
+    background-color: white;
+    padding: 15px;
+    border-radius: 8px;
+    text-align: right;
+    font-size: 18px;
+}
+
+#total-price {
+    font-weight: bold;
+    color: #e22500;
+}
+
+button {
+    padding: 10px 20px;
+    background-color: #e22500;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+button:hover {
+    background-color: #ce3011;
+}
+
+/* Mniejsze przyciski dla ilości */
+#cart-table button {
+    font-size: 14px; /* Zmniejszenie rozmiaru czcionki */
+    padding: 5px 10px; /* Mniejsze wymiary przycisków */
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+#cart-table button:hover {
+    background-color: #ce3011;
+}
+
+/* Zwiększony przycisk finalizacji zamówienia */
+#checkout-button {
+    padding: 10px 25px; /* Zwiększenie rozmiaru przycisku */
+    font-size: 18px; /* Większa czcionka */
+    background-color: #ce3011;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    margin-top: 10px;
+}
+
+#checkout-button:hover {
+    background-color: black;
+}
+
+
+
+
+
+
+/* Moje konto */
+   /* Ukryj wszystkie sekcje domyślnie */
+    .section {
+        display: none;
+    }
+
+    /* Pokaż tylko aktywną sekcję */
+    .section.active {
+        display: block;
+    }
+
+
+/* Styl dla zakładek */
+nav a {
+    display: inline-block;
+    width: 11%;
+    padding: 15px 15px;
+    color: white;
+    text-decoration: none;
+    text-align: center;
+    transition: all 0.3s;
+}
+
+nav a:hover {background-color: #ffe7e9;
+color: black;}
+
+/* Stylizacja nagłówków w sekcjach */
+.section h2 {
+    font-size: 24px;
+    color: #e22500;
+    text-align: center;
+    margin-bottom: 15px;
+}
+
+/* Lista zamówień */
+#orders-list {
+    list-style: none;
+    padding: 0;
+    margin: 20px auto;
+    max-width: 600px;
+}
+
+#orders-list li {
+    padding: 10px;
+    margin-bottom: 10px;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    background-color: #f9f9f9;
+    text-align: center;
+    font-size: 16px;
+}
+
+/* Styl dla przycisku umieszczonego na dole i wyśrodkowanego */
+#clear-orders-btn {
+    display: block;
+    margin: 10px auto 0; 
+    padding: 8px 16px; 
+    background-color: #e22500; 
+    color: white; 
+    border: none; 
+    border-radius: 5px; 
+    cursor: pointer; 
+    font-size: 14px; 
+}
+
+#clear-orders-btn:hover {
+    background-color: #ce3011; /* Kolor przycisku po najechaniu */
+}
+
+
+/* Sekcja recenzji */
+
+#reviews {
+    padding: 20px;
+    background-color: #f9f9f9;
+    border-radius: 10px;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+}
+
+/* Nagłówek "Twoje recenzje" */
+#reviews h2 {
+    font-size: 28px;
+    color: #e22500;
+    text-align: center;
+    margin-top: 40px; 
+    margin-bottom: 30px; 
+    display: inline-block; 
+    width: 100%; 
+    text-align: center; 
+}
+
+
+#search-book {
+    padding: 10px;
+    font-size: 16px;
+    border-radius: 5px;
+    border: 1px solid #ccc;
+    width: 100%;
+    margin-bottom: 20px;
+    display: block;
+}
+
+#search-results {
+    margin-bottom: 20px;
+}
+
+#review-section {
+    margin-top: 20px;
+}
+
+#saved-reviews-section .review {
+    padding: 15px;
+    margin-bottom: 15px;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    background-color: #f9f9f9;
+}
+
+#saved-reviews-section .review p {
+    font-size: 16px;
+    margin-bottom: 10px;
+}
+
+#saved-reviews-section .review button {
+    background-color: #e22500;
+    color: white;
+    border: none;
+    padding: 8px 16px;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+#saved-reviews-section .review button:hover {
+    background-color: #ce3011;
+}
+
+textarea {
+    width: 100%;
+    padding: 10px;
+    margin-top: 10px;
+    border-radius: 5px;
+    border: 1px solid #ccc;
+    font-size: 16px;
+}
+
+input[type="number"] {
+    padding: 10px;
+    font-size: 16px;
+    border-radius: 5px;
+    border: 1px solid #ccc;
+    width: 100%;
+}
+
+
+/* Wyzwanie czytelnicze */
+#challenge {
+    text-align: center;
+    margin: 20px auto;
+}
+
+#challenge input {
+    padding: 10px;
+    margin: 10px 0;
+    width: 60%;
+    font-size: 16px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+}
+
+#challenge-status {
+    font-size: 18px;
+    color: #e22500;
+    margin: 10px 0;
+}
+
+/* Stylizacja przycisków */
+#challenge button {
+    padding: 10px 20px;
+    background-color: #e22500;
+    color: white;
+    font-size: 16px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+#challenge button:hover {
+    background-color: #ce3011;
+}
+
+/* Stylizacja dla sekcji dynamicznych */
+.section {
+    padding: 20px;
+    background-color: #f9f9f9;
+    border-radius: 10px;
+    margin: 20px auto;
+    max-width: 800px;
+}
+
+.section.active {
+    animation: fadeIn 0.5s ease-in-out;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(-10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+
+
+/* Ogólne ciemny motyw */
+body.dark-mode {
+    background-color: #121212;
+    color: black;
+}
+
+/* Elementy specyficzne */
+.dark-mode nav,
+.dark-mode footer,
+.dark-mode .section,
+.dark-mode #cart-summary,
+.dark-mode #filter,
+.dark-mode button {
+    background-color: #1e1e1e;
+    color: #ffffff;
+    border-color: #333;
+}
+
+/* Dostosowanie dla tabel */
+.dark-mode #cart-table th,
+.dark-mode #cart-table td {
+    background-color: #2c2c2c;
+    color: #ffffff;
+}
+
+/* Styl dla aktywnych zakładek */
+.dark-mode .tab.active {
+    background-color: #333;
+    color: #ffffff;
+}
+
+/* Przyciski i pola formularzy */
+.dark-mode button,
+.dark-mode input,
+.dark-mode textarea,
+.dark-mode select {
+    background-color: #333;
+    color: #ffffff;
+    border: 1px solid #555;
+}
+
+.dark-mode #wrapper {
+    background-color: #121212; /* Ciemne tło */
+    
+}
+
+.dark-mode article h1 {
+font-size:30px;
+text-align: center;
+margin: 0 20% 20px 20%;
+padding-bottom: 15px;
+border-bottom: 2px solid white;
+color: white;}
+
+
+/* Formularz rejestracji i logowania */
+#register-section, #login-section {
+    background-color: #f9f9f9;
+    padding: 20px;
+    border-radius: 10px;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+    margin: 20px auto;
+    max-width: 500px;
+    width: 100%;
+}
+
+#register-section h2, #login-section h2 {
+    font-size: 24px;
+    color: #e22500;
+    text-align: center;
+    margin-bottom: 20px;
+}
+
+form {
+    display: flex;
+    flex-direction: column;
+}
+
+form label {
+    font-size: 16px;
+    margin-bottom: 5px;
+    color: #333;
+}
+
+form input {
+    padding: 12px;
+    font-size: 16px;
+    margin-bottom: 15px;
+    border-radius: 5px;
+    border: 1px solid #ccc;
+    background-color: #fff;
+}
+
+form input:focus {
+    outline: none;
+    border-color: #e22500;
+}
+
+form button {
+    padding: 12px 20px;
+    font-size: 16px;
+    background-color: #e22500;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+form button:hover {
+    background-color: #ce3011;
+}
+
+#register-message, #login-message {
+    text-align: center;
+    font-size: 14px;
+    color: #e22500;
+    margin-top: 10px;
+}
+
+/* Dostosowanie sekcji dla ciemnego motywu */
+body.dark-mode #register-section,
+body.dark-mode #login-section {
+    background-color: #2c2c2c;
+}
+
+body.dark-mode form input {
+    background-color: #333;
+    color: white;
+    border: 1px solid #555;
+}
+
+body.dark-mode form button {
+    background-color: #333;
+    color: white;
+}
+
+body.dark-mode form button:hover {
+    background-color: #ce3011;
+}
