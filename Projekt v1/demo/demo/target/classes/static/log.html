@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+    <meta charset="UTF-8">
+    <title>BookZone - Logowanie</title>
+    <link href="https://fonts.googleapis.com/css?family=Roboto:400,900&subset=latin-ext" rel="stylesheet">
+    <link rel="shortcut icon" href="favicon.ico" type="image/x-icon">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div id="wrapper">
+        <nav>
+            <a class="menu" href="index.html">Strona Główna</a>
+            <a class="menu" href="cart.html">Koszyk</a>
+            <a class="menu" href="account.html">Moje Konto</a>
+            <a class="menu" href="log.html">Zaloguj się!</a>
+            <button id="toggle-dark-mode">Zmień motyw</button>
+        </nav>
+
+        <header>
+            <img src="graph/header.png" alt="header">
+        </header>
+
+        <section>
+            <article>
+                <h1>BookZone - Zaloguj się lub Zarejestruj</h1>
+            </article>
+        </section>
+
+        <!-- Formularz rejestracji -->
+        <section id="register-section">
+            <h2>Rejestracja</h2>
+            <form id="registerForm">
+                <label>Email:</label>
+                <input type="email" name="email" required>
+                <label>Hasło:</label>
+                <input type="password" name="password" required>
+                <button type="submit">Zarejestruj</button>
+            </form>
+            <p id="register-message"></p>
+        </section>
+
+        <!-- Formularz logowania -->
+        <section id="login-section">
+            <h2>Logowanie</h2>
+            <form id="loginForm">
+                <label>Email:</label>
+                <input type="email" name="email" required>
+                <label>Hasło:</label>
+                <input type="password" name="password" required>
+                <button type="submit">Zaloguj</button>
+            </form>
+            <p id="login-message"></p>
+        </section>
+
+        <footer>
+            <img src="graph/footer.png" alt="footer">
+        </footer>
+    </div>
+
+    <script>
+        // Obsługa formularza rejestracji
+        document.getElementById('registerForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const email = e.target.email.value;
+            const password = e.target.password.value;
+
+            const response = await fetch('http://localhost:8080/auth/register', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ email, password }),
+            });
+
+            const data = await response.json();
+            alert(data);
+        });
+
+        // Obsługa formularza logowania
+        document.getElementById('loginForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const email = e.target.email.value;
+            const password = e.target.password.value;
+
+            const response = await fetch('http://localhost:8080/auth/login', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ email, password }),
+            });
+
+            const data = await response.json();
+            if (response.ok) {
+                alert('Zalogowano pomyślnie!');
+                localStorage.setItem('token', data.token); // Zapisz token w localStorage
+                window.location.href = 'account.html'; // Przekieruj do strony konta
+            } else {
+                alert(data);
+            }
+        });
+    </script>
+</body>
+</html>
